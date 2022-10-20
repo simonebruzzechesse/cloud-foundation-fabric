@@ -37,13 +37,36 @@ locals {
       ]
     },
   ]
-  nva_locality = {
-    europe-west1-b = { region = "europe-west1", trigram = "ew1", zone = "b" },
-    europe-west1-c = { region = "europe-west1", trigram = "ew1", zone = "c" },
-    europe-west4-b = { region = "europe-west4", trigram = "ew4", zone = "b" },
-    europe-west4-c = { region = "europe-west4", trigram = "ew4", zone = "c" },
+  nva_configs = {
+    europe-west1-b = {
+      region       = "europe-west1",
+      trigram      = "ew1",
+      zone         = "b",
+      ip_untrusted = cidrhost(module.landing-untrusted-vpc.subnet_ips["europe-west1/landing-untrusted-default-ew1"], 101)
+      ip_trusted   = cidrhost(module.landing-trusted-vpc.subnet_ips["europe-west1/landing-trusted-default-ew1"], 101)
+    },
+    europe-west1-c = {
+      region       = "europe-west1",
+      trigram      = "ew1",
+      zone         = "c",
+      ip_untrusted = cidrhost(module.landing-untrusted-vpc.subnet_ips["europe-west1/landing-untrusted-default-ew1"], 102)
+      ip_trusted   = cidrhost(module.landing-trusted-vpc.subnet_ips["europe-west1/landing-trusted-default-ew1"], 102)
+    },
+    europe-west4-b = {
+      region       = "europe-west4",
+      trigram      = "ew4",
+      zone         = "b",
+      ip_untrusted = cidrhost(module.landing-untrusted-vpc.subnet_ips["europe-west4/landing-untrusted-default-ew4"], 103)
+      ip_trusted   = cidrhost(module.landing-trusted-vpc.subnet_ips["europe-west4/landing-trusted-default-ew4"], 103)
+    },
+    europe-west4-c = {
+      region       = "europe-west4",
+      trigram      = "ew4",
+      zone         = "c",
+      ip_untrusted = cidrhost(module.landing-untrusted-vpc.subnet_ips["europe-west4/landing-untrusted-default-ew4"], 104)
+      ip_trusted   = cidrhost(module.landing-trusted-vpc.subnet_ips["europe-west4/landing-trusted-default-ew4"], 104)
+    }
   }
-
 }
 
 # NVA config
@@ -53,28 +76,53 @@ module "nva-cloud-config" {
   network_interfaces   = local.routing_config
 }
 
-module "nva-template" {
-  for_each        = local.nva_locality
-  source          = "../../../modules/compute-vm"
-  project_id      = module.landing-project.project_id
-  name            = "nva-template-${each.value.trigram}-${each.value.zone}"
-  zone            = "${each.value.region}-${each.value.zone}"
-  instance_type   = "e2-standard-2"
-  tags            = ["nva"]
-  create_template = true
-  can_ip_forward  = true
+resource "google_compute_address" "nva_static_ip_untrusted" {
+  for_each     = local.nva_configs
+  name         = "nva-ip-untrusted-${each.value.trigram}-${each.value.zone}"
+  project      = module.landing-project.project_id
+  subnetwork   = module.landing-untrusted-vpc.subnet_self_links["${each.value.region}/landing-untrusted-default-${each.value.trigram}"]
+  address_type = "INTERNAL"
+  address      = each.value.ip_untrusted
+  region       = each.value.region
+}
+
+resource "google_compute_address" "nva_static_ip_trusted" {
+  for_each     = local.nva_configs
+  name         = "nva-ip-trusted-${each.value.trigram}-${each.value.zone}"
+  project      = module.landing-project.project_id
+  subnetwork   = module.landing-trusted-vpc.subnet_self_links["${each.value.region}/landing-trusted-default-${each.value.trigram}"]
+  address_type = "INTERNAL"
+  address      = each.value.ip_trusted
+  region       = each.value.region
+}
+
+module "nva" {
+  for_each       = local.nva_configs
+  source         = "../../../modules/compute-vm"
+  project_id     = module.landing-project.project_id
+  name           = "nva-${each.value.trigram}-${each.value.zone}"
+  zone           = "${each.value.region}-${each.value.zone}"
+  instance_type  = "e2-standard-2"
+  tags           = ["nva"]
+  can_ip_forward = true
   network_interfaces = [
     {
       network    = module.landing-untrusted-vpc.self_link
       subnetwork = module.landing-untrusted-vpc.subnet_self_links["${each.value.region}/landing-untrusted-default-${each.value.trigram}"]
       nat        = false
-      addresses  = null
+      addresses = {
+        external = null
+        internal = google_compute_address.nva_static_ip_untrusted["${each.key}"].address
+      }
     },
     {
       network    = module.landing-trusted-vpc.self_link
       subnetwork = module.landing-trusted-vpc.subnet_self_links["${each.value.region}/landing-trusted-default-${each.value.trigram}"]
       nat        = false
-      addresses  = null
+      addresses = {
+        external = null
+        internal = google_compute_address.nva_static_ip_trusted["${each.key}"].address
+      }
     }
   ]
   boot_disk = {
@@ -162,4 +210,3 @@ module "ilb-nva-trusted" {
     }
   }
 }
-

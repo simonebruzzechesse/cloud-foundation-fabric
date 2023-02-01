@@ -79,6 +79,12 @@ variable "name" {
   type        = string
 }
 
+variable "network_tag_bindings" {
+  description = "Secure network tag bindings for this instance, in key => tag value id format."
+  type        = map(string)
+  default     = null
+}
+
 variable "prefix" {
   description = "Optional prefix used for resource names."
   type        = string

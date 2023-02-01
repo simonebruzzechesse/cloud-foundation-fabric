@@ -19,3 +19,10 @@ resource "google_tags_tag_binding" "binding" {
   parent    = "//compute.googleapis.com/${google_compute_instance.default.0.id}"
   tag_value = each.value
 }
+
+resource "google_tags_location_tag_binding" "network_binding" {
+  for_each  = var.create_template ? {} : coalesce(var.network_tag_bindings, {})
+  location  = var.region
+  parent    = "//compute.googleapis.com/${google_compute_instance.default.0.id}"
+  tag_value = each.value
+}

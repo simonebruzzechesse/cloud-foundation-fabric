@@ -198,6 +198,12 @@ variable "network_interfaces" {
   }))
 }
 
+variable "network_tag_bindings" {
+  description = "Secure network tag bindings for this instance, in key => tag value id format."
+  type        = map(string)
+  default     = null
+}
+
 variable "options" {
   description = "Instance options."
   type = object({

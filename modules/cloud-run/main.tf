@@ -267,3 +267,10 @@ resource "google_eventarc_trigger" "pubsub_triggers" {
     }
   }
 }
+
+resource "google_tags_location_tag_binding" "network_binding" {
+  for_each  = var.create_template ? {} : coalesce(var.network_tag_bindings, {})
+  location  = var.region
+  parent    = "//run.googleapis.com/${google_cloud_run_service.service.id}"
+  tag_value = each.value
+}

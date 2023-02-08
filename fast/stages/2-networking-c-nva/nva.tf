@@ -103,7 +103,7 @@ module "nva-mig" {
   location          = each.value.region
   name              = "nva-cos-${each.key}"
   instance_template = module.nva-template[each.key].template.self_link
-  target_size       = 1
+  target_size       = var.enable_cost_saving ? 0 : 1
   auto_healing_policies = {
     initial_delay_sec = 30
   }

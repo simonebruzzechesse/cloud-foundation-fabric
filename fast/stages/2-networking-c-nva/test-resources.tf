@@ -42,6 +42,7 @@
 #       apt install iputils-ping bind9-dnsutils
 #     EOF
 #   }
+#   desired_status = var.enable_cost_saving ? "TERMINATED" : "RUNNING"
 # }
 
 # module "test-vm-landing-untrusted-secondary-0" {
@@ -68,6 +69,7 @@
 #       apt install iputils-ping bind9-dnsutils
 #     EOF
 #   }
+#   desired_status = var.enable_cost_saving ? "TERMINATED" : "RUNNING"
 # }
 
 # # Trusted (hub)
@@ -96,6 +98,7 @@
 #       apt install iputils-ping bind9-dnsutils
 #     EOF
 #   }
+#   desired_status = var.enable_cost_saving ? "TERMINATED" : "RUNNING"
 # }
 
 # module "test-vm-landing-trusted-secondary-0" {
@@ -122,6 +125,7 @@
 #       apt install iputils-ping bind9-dnsutils
 #     EOF
 #   }
+#   desired_status = var.enable_cost_saving ? "TERMINATED" : "RUNNING"
 # }
 
 # # Dev spoke
@@ -151,6 +155,7 @@
 #       apt install iputils-ping bind9-dnsutils
 #     EOF
 #   }
+#   desired_status = var.enable_cost_saving ? "TERMINATED" : "RUNNING"
 # }
 
 # module "test-vm-dev-secondary-0" {
@@ -178,6 +183,7 @@
 #       apt install iputils-ping bind9-dnsutils
 #     EOF
 #   }
+#   desired_status = var.enable_cost_saving ? "TERMINATED" : "RUNNING"
 # }
 
 # # Prod spoke
@@ -209,6 +215,7 @@
 #       apt install iputils-ping bind9-dnsutils
 #     EOF
 #   }
+#   desired_status = var.enable_cost_saving ? "TERMINATED" : "RUNNING"
 # }
 
 # module "test-vm-prod-secondary-0" {
@@ -236,4 +243,5 @@
 #       apt install iputils-ping bind9-dnsutils
 #     EOF
 #   }
+#   desired_status = var.enable_cost_saving ? "TERMINATED" : "RUNNING"
 # }

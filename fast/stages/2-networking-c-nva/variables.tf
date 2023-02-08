@@ -74,6 +74,12 @@ variable "dns" {
   }
 }
 
+variable "enable_cost_saving" {
+  description = "Setting this variable to true will shutdown or destroy billable resources (e.g. VMs, VPN Tunnels)"
+  type        = bool
+  default     = false
+}
+
 variable "factories_config" {
   description = "Configuration for network resource factories."
   type = object({

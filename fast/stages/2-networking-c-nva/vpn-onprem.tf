@@ -17,7 +17,7 @@
 # tfdoc:file:description VPN between landing and onprem.
 
 locals {
-  enable_onprem_vpn = var.vpn_onprem_configs != null
+  enable_onprem_vpn = var.vpn_onprem_configs != null && !var.enable_cost_saving
   bgp_peer_options_onprem = local.enable_onprem_vpn == false ? null : {
     for k, v in var.vpn_onprem_configs :
     k => v.adv == null ? null : {

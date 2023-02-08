@@ -112,10 +112,21 @@ variable "create_template" {
   type        = bool
   default     = false
 }
+
 variable "description" {
   description = "Description of a Compute Instance."
   type        = string
   default     = "Managed by the compute-vm Terraform module."
+}
+
+variable "desired_status" {
+  description = "Desired status for the V, allowed values are 'RUNNING' or 'TERMINATED'"
+  type        = string
+  default     = "RUNNING"
+  validation {
+    condition     = var.desired_status == null || contains(["RUNNING", "TERMINATED"], coalesce(var.desired_status, "1"))
+    error_message = "Allowed values for desired_status are 'RUNNING', 'TERMINATED' or null."
+  }
 }
 
 variable "enable_display" {
